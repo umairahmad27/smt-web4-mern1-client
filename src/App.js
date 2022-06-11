@@ -16,6 +16,23 @@ function App() {
     setState(s => ({ ...s, [e.target.name]: e.target.value }))
   }
 
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    let formData = { ...state }
+    console.log(formData)
+
+    axios.post(`${URL}/createUser`, formData)
+      .then((res) => {
+        console.log("A new user has been successfully added.")
+      })
+      .catch(err => {
+        console.error(err)
+      })
+
+    // console.log(formData)
+  }
+
   useEffect(() => {
     axios.get(`${URL}/getUsers`)
       .then((res) => {
@@ -27,21 +44,36 @@ function App() {
       })
   }, [])
 
-  const handleSubmit = e => {
-    e.preventDefault();
+  const handleUpdate = doc => {
+    console.log(doc)
 
-    let formData = { ...state }
-    console.log(formData)
+    let newData = { id: doc._id, name: "Ahmad", age: 25 }
 
-    axios.post(`${URL}/createUser`, formData)
-      .then(() => {
-        console.log("A new user has been successfully added.")
+    axios.put(`${URL}/updateUser`, newData)
+      .then((res) => {
+        console.log("message from server", res.data)
+        alert("User has been successfully updated.")
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err)
       })
 
-    // console.log(formData)
+  }
+  const handleDelete = doc => {
+    console.log(doc)
+
+    const { _id } = doc
+
+    axios.delete(`${URL}/deleteUser/${_id}`)
+      .then((res) => {
+        console.log("User deleted")
+        console.log("message from server", res.data)
+        // setDocuments(res.data)
+      }).catch((err) => {
+        console.error(err)
+      }).finally(() => {
+        // console.log("finally worked")
+      })
   }
 
   return (
@@ -61,6 +93,9 @@ function App() {
           <p><b>Name</b>: {doc.name}</p>
           <p><b>Age</b>: {doc.age}</p>
           <p><b>User Name</b>: {doc.userName}</p>
+          <div>
+            <button onClick={() => { handleUpdate(doc) }}>Update</button>&ensp;<button onClick={() => { handleDelete(doc) }}>Delete</button>
+          </div>
           <hr />
         </div>
       })}
